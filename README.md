@@ -13,7 +13,7 @@ Your token data never leaves your account.
 Before running Terraform:
 
 1. **Contact Roqad** with your AWS account ID. Roqad must add your account to the
-   collaboration and will reply with `collaboration_id` and `analysis_template_arn`.
+   collaboration and will reply with `collaboration_id` and `analysis_template_arns`.
 
 2. **Your Glue tables must exist** with the schemas below. This module references
    them — it does not create them.

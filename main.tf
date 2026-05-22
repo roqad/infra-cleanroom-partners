@@ -39,7 +39,7 @@ resource "awscc_cleanrooms_configured_table" "hem_source_file" {
       policy = {
         v1 = {
           custom = {
-            allowed_analyses    = [var.analysis_template_arn]
+            allowed_analyses    = var.analysis_template_arns
             additional_analyses = "NOT_ALLOWED"
           }
         }
@@ -76,7 +76,7 @@ resource "awscc_cleanrooms_configured_table" "token_hem" {
       policy = {
         v1 = {
           custom = {
-            allowed_analyses    = [var.analysis_template_arn]
+            allowed_analyses    = var.analysis_template_arns
             additional_analyses = "NOT_ALLOWED"
           }
         }

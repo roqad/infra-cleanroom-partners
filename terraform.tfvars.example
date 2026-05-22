@@ -1,10 +1,15 @@
 # Copy this file to terraform.tfvars and fill in the values below.
-# Roqad provides collaboration_id and analysis_template_arn when your account is added.
+# Roqad provides collaboration_id and analysis_template_arns when your account is added.
 
 # ── Provided by Roqad ─────────────────────────────────────────────────────────
 
-collaboration_id      = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-analysis_template_arn = "arn:aws:cleanrooms:eu-west-1:..."
+collaboration_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+
+# All template ARNs from Roqad. When Roqad adds a new template version, they will
+# send the new ARN — add it to this list and re-apply to whitelist it.
+analysis_template_arns = [
+  "arn:aws:cleanrooms:eu-west-1:...",
+]
 
 # ── Your Glue tables ──────────────────────────────────────────────────────────
 

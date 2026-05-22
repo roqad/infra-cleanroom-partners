@@ -6,9 +6,9 @@ variable "collaboration_id" {
   type        = string
 }
 
-variable "analysis_template_arn" {
-  description = "ARN of the Roqad analysis template. Provided by Roqad — set in terraform.tfvars."
-  type        = string
+variable "analysis_template_arns" {
+  description = "ARNs of all Roqad analysis templates. Provided by Roqad — set in terraform.tfvars. All must be whitelisted so queries can run after template updates."
+  type        = list(string)
 }
 
 variable "region" {
