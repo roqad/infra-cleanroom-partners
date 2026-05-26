@@ -1,6 +1,6 @@
 # Roqad Match-Stats Cleanroom — Data Provider Setup
 
-This module sets up your AWS account as a data provider in a Roqad match-stats
+This repository sets up your AWS account as a data provider in a Roqad match-stats
 collaboration. You contribute token→HEM mapping tables; Roqad runs overlap queries
 on behalf of its customers and reports aggregate match statistics back to them.
 Your token data never leaves your account.
@@ -13,21 +13,23 @@ Your token data never leaves your account.
 Before running Terraform:
 
 1. **Contact Roqad** with your AWS account ID. Roqad must add your account to the
-   collaboration and will reply with `collaboration_id` and `analysis_template_arns`.
+   collaboration and will reply with a `collaboration_id` and `analysis_template_arns`.
+   Fill both values into `main.tf` (marked with comments).
 
 2. **Your Glue tables must exist** with the schemas below. This module references
    them — it does not create them.
 
-3. **Terraform ≥ 1.5** and AWS credentials with permissions to create IAM roles
-   and Clean Rooms resources in `eu-west-1`.
+3. **OpenTofu ≥ 1.5** (or Terraform ≥ 1.5) and AWS credentials with permissions
+   to create IAM roles and Clean Rooms resources in `eu-west-1`.
 
 ## Setup
 
+1. Edit `config.tf` — fill in your Glue table names and S3 locations (the only file you need to change).
+2. Edit `main.tf` — replace the placeholder `collaboration_id` and `analysis_template_arns` with the values from Roqad.
+
 ```sh
-cp terraform.tfvars.example terraform.tfvars
-# fill in the 2 values from Roqad and the 8 values for your Glue tables and S3 locations
-terraform init
-terraform apply
+tofu init
+tofu apply
 ```
 
 After apply, share the `membership_id` output with Roqad to confirm your setup is complete.
@@ -51,7 +53,7 @@ After apply, share the `membership_id` output with Roqad to confirm your setup i
 | `first_party_id_value` | string |
 | `matched_id_type` | string |
 | `matched_id_value` | string |
-| `d` | date |
+| `d` | string (date as `YYYY-MM-DD`, used as partition key) |
 
 Additional columns are allowed and are not exposed to the collaboration.
 
@@ -66,9 +68,10 @@ Additional columns are allowed and are not exposed to the collaboration.
 
 ## Security
 
-The CUSTOM analysis rule on both configured tables restricts queries to a single,
-fixed Roqad analysis template. That template produces only three aggregate values:
+The CUSTOM analysis rule on both configured tables restricts queries to a fixed set of
+Roqad analysis templates. Those templates produce only aggregate values per country:
 
+- `country`
 - `input_distinct_hem_count`
 - `matched_distinct_hem_count`
 - `match_rate`
