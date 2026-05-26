@@ -1,10 +1,10 @@
 # Configure your AWS credentials via environment variables, AWS profile, or IAM role.
-# The region must stay eu-west-1 — that is where the Roqad collaboration lives.
+# The region is fixed — the Roqad collaboration lives in eu-west-1.
 
 provider "aws" {
-  region = var.region
+  region = "eu-west-1"
 }
 
 provider "awscc" {
-  region = var.region
+  region = "eu-west-1"
 }

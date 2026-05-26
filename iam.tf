@@ -1,5 +1,5 @@
 # IAM role assumed by the Clean Rooms service to read your Glue catalog and S3 data.
-# Scoped to the two tables and S3 prefixes you configure — nothing else.
+# Scoped to the two tables and S3 prefixes in config.tf — nothing else.
 
 data "aws_iam_policy_document" "cleanrooms_assume" {
   statement {
@@ -67,11 +67,11 @@ data "aws_iam_policy_document" "cleanrooms_access" {
       "glue:BatchGetPartition",
     ]
     resources = distinct([
-      "arn:aws:glue:${var.region}:${data.aws_caller_identity.current.account_id}:catalog",
-      "arn:aws:glue:${var.region}:${data.aws_caller_identity.current.account_id}:database/${var.hem_source_file_glue_database}",
-      "arn:aws:glue:${var.region}:${data.aws_caller_identity.current.account_id}:table/${var.hem_source_file_glue_database}/${var.hem_source_file_glue_table}",
-      "arn:aws:glue:${var.region}:${data.aws_caller_identity.current.account_id}:database/${var.token_hem_glue_database}",
-      "arn:aws:glue:${var.region}:${data.aws_caller_identity.current.account_id}:table/${var.token_hem_glue_database}/${var.token_hem_glue_table}",
+      "arn:aws:glue:${local.region}:${data.aws_caller_identity.current.account_id}:catalog",
+      "arn:aws:glue:${local.region}:${data.aws_caller_identity.current.account_id}:database/${local.hem_source_file_glue_database}",
+      "arn:aws:glue:${local.region}:${data.aws_caller_identity.current.account_id}:table/${local.hem_source_file_glue_database}/${local.hem_source_file_glue_table}",
+      "arn:aws:glue:${local.region}:${data.aws_caller_identity.current.account_id}:database/${local.token_hem_glue_database}",
+      "arn:aws:glue:${local.region}:${data.aws_caller_identity.current.account_id}:table/${local.token_hem_glue_database}/${local.token_hem_glue_table}",
     ])
   }
 }
