@@ -24,7 +24,7 @@ Before running Terraform:
 
 ## Setup
 
-1. Edit `config.tf` — fill in your Glue table names and S3 locations (the only file you need to change).
+1. Edit `config.tf` — fill in your Glue table names and S3 locations.
 2. Edit `main.tf` — replace the placeholder `collaboration_id` and `analysis_template_arns` with the values from Roqad.
 
 ```sh
