@@ -1,5 +1,5 @@
 # IAM role assumed by the Clean Rooms service to read your Glue catalog and S3 data.
-# Scoped to the two tables and S3 prefixes in config.tf — nothing else.
+# Scoped to the single table and S3 prefix in config.tf — nothing else.
 
 data "aws_iam_policy_document" "cleanrooms_assume" {
   statement {
@@ -25,37 +25,24 @@ resource "aws_iam_role" "cleanrooms" {
 
 data "aws_iam_policy_document" "cleanrooms_access" {
   statement {
-    sid    = "S3ReadHemSourceFile"
+    sid    = "S3Read"
     effect = "Allow"
     actions = [
       "s3:GetObject",
       "s3:GetObjectVersion",
     ]
-    resources = [local.hem_source_file_prefix_arn]
+    resources = [local.prefix_arn]
   }
 
   statement {
-    sid    = "S3ReadTokenHem"
-    effect = "Allow"
-    actions = [
-      "s3:GetObject",
-      "s3:GetObjectVersion",
-    ]
-    resources = [local.token_hem_prefix_arn]
-  }
-
-  statement {
-    sid     = "S3ListBuckets"
+    sid     = "S3ListBucket"
     effect  = "Allow"
     actions = ["s3:ListBucket"]
-    resources = distinct([
-      local.hem_source_file_bucket_arn,
-      local.token_hem_bucket_arn,
-    ])
+    resources = [local.bucket_arn]
   }
 
   statement {
-    sid    = "GlueReadTables"
+    sid    = "GlueReadTable"
     effect = "Allow"
     actions = [
       "glue:GetDatabase",
@@ -66,13 +53,11 @@ data "aws_iam_policy_document" "cleanrooms_access" {
       "glue:GetPartitions",
       "glue:BatchGetPartition",
     ]
-    resources = distinct([
+    resources = [
       "arn:aws:glue:${local.region}:${data.aws_caller_identity.current.account_id}:catalog",
-      "arn:aws:glue:${local.region}:${data.aws_caller_identity.current.account_id}:database/${local.hem_source_file_glue_database}",
-      "arn:aws:glue:${local.region}:${data.aws_caller_identity.current.account_id}:table/${local.hem_source_file_glue_database}/${local.hem_source_file_glue_table}",
-      "arn:aws:glue:${local.region}:${data.aws_caller_identity.current.account_id}:database/${local.token_hem_glue_database}",
-      "arn:aws:glue:${local.region}:${data.aws_caller_identity.current.account_id}:table/${local.token_hem_glue_database}/${local.token_hem_glue_table}",
-    ])
+      "arn:aws:glue:${local.region}:${data.aws_caller_identity.current.account_id}:database/${local.glue_database}",
+      "arn:aws:glue:${local.region}:${data.aws_caller_identity.current.account_id}:table/${local.glue_database}/${local.glue_table}",
+    ]
   }
 }
 

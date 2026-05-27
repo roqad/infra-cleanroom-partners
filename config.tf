@@ -1,22 +1,27 @@
 # ═══════════════════════════════════════════════════════════════════════════════
 # This is the only file you need to edit.
 #
-# Fill in your Glue table names and S3 locations below.
-# See README.md for the required column schemas for each table.
+# 1. Set schema_type — see README.md for the column requirements of each schema.
+# 2. Set configured_table_name to a value unique to this provider if multiple
+#    providers join the same collaboration with the same schema_type.
+# 3. Fill in your Glue table name and S3 location.
 # ═══════════════════════════════════════════════════════════════════════════════
 
 locals {
-  # Table with all token-to-HEM mappings.
-  # Required columns: first_party_id_type, first_party_id_value, matched_id_type, matched_id_value
-  hem_source_file_glue_database = "your_database"
-  hem_source_file_glue_table    = "hem_source_file"
-  hem_source_file_s3_bucket     = "your-bucket"
-  hem_source_file_s3_key_prefix = "path/to/hem_source_file/"
+  # "hem_source_file" — columns: first_party_id_type, first_party_id_value, matched_id_type, matched_id_value
+  # "token_hem"       — same columns plus d (date partition)
+  schema_type = "hem_source_file"
 
-  # Dated snapshot table — query reads only the most recent partition (MAX(d)).
-  # Required columns: first_party_id_type, first_party_id_value, matched_id_type, matched_id_value, d (date)
-  token_hem_glue_database = "your_database"
-  token_hem_glue_table    = "token_hem"
-  token_hem_s3_bucket     = "your-bucket"
-  token_hem_s3_key_prefix = "path/to/token_hem/"
+  # SQL name registered in the Clean Rooms collaboration.
+  # Must be unique per member within the collaboration — change this if another
+  # provider already uses the same schema_type in the same collaboration.
+  configured_table_name = local.schema_type
+
+  # Your Glue table
+  glue_database = "your_database"
+  glue_table    = "your_table"
+
+  # Your S3 location
+  s3_bucket     = "your-bucket"
+  s3_key_prefix = "path/to/your/table/"
 }

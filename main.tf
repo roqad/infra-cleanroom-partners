@@ -15,6 +15,12 @@ locals {
   analysis_template_arns = [
     "arn:aws:cleanrooms:eu-west-1:000000000000:membership/00000000-0000-0000-0000-000000000000/analysistemplate/00000000-0000-0000-0000-000000000000",
   ]
+
+  columns_by_schema = {
+    hem_source_file = ["first_party_id_type", "first_party_id_value", "matched_id_type", "matched_id_value"]
+    token_hem       = ["first_party_id_type", "first_party_id_value", "matched_id_type", "matched_id_value", "d"]
+  }
+  allowed_columns = local.columns_by_schema[local.schema_type]
 }
 
 # ── Computed ──────────────────────────────────────────────────────────────────
@@ -22,10 +28,8 @@ locals {
 data "aws_caller_identity" "current" {}
 
 locals {
-  hem_source_file_bucket_arn = "arn:aws:s3:::${local.hem_source_file_s3_bucket}"
-  hem_source_file_prefix_arn = "arn:aws:s3:::${local.hem_source_file_s3_bucket}/${local.hem_source_file_s3_key_prefix}*"
-  token_hem_bucket_arn       = "arn:aws:s3:::${local.token_hem_s3_bucket}"
-  token_hem_prefix_arn       = "arn:aws:s3:::${local.token_hem_s3_bucket}/${local.token_hem_s3_key_prefix}*"
+  bucket_arn = "arn:aws:s3:::${local.s3_bucket}"
+  prefix_arn = "arn:aws:s3:::${local.s3_bucket}/${local.s3_key_prefix}*"
 }
 
 # ── Membership ────────────────────────────────────────────────────────────────
@@ -37,21 +41,14 @@ resource "awscc_cleanrooms_membership" "this" {
   query_log_status         = "ENABLED"
 }
 
-# ── Configured tables ─────────────────────────────────────────────────────────
+# ── Configured table ──────────────────────────────────────────────────────────
 # allowed_columns and analysis_rules are fixed by the Roqad analysis template.
 # Do not change these.
 
-resource "awscc_cleanrooms_configured_table" "hem_source_file" {
-  name        = "hem_source_file"
-  description = "Token-to-HEM provider mappings for Roqad match-stats collaboration."
-
-  allowed_columns = [
-    "first_party_id_type",
-    "first_party_id_value",
-    "matched_id_type",
-    "matched_id_value",
-  ]
-
+resource "awscc_cleanrooms_configured_table" "this" {
+  name            = local.configured_table_name
+  description     = "Provider data for Roqad match-stats collaboration."
+  allowed_columns = local.allowed_columns
   analysis_method = "DIRECT_QUERY"
 
   analysis_rules = [
@@ -70,65 +67,19 @@ resource "awscc_cleanrooms_configured_table" "hem_source_file" {
 
   table_reference = {
     glue = {
-      database_name = local.hem_source_file_glue_database
-      table_name    = local.hem_source_file_glue_table
+      database_name = local.glue_database
+      table_name    = local.glue_table
       region        = local.region
     }
   }
 }
 
-resource "awscc_cleanrooms_configured_table" "token_hem" {
-  name        = "token_hem"
-  description = "Dated token-to-HEM snapshot for Roqad match-stats collaboration. Query uses only the most recent date partition."
+# ── Configured table association ──────────────────────────────────────────────
+# SQL name is fixed — referenced by the analysis template.
 
-  allowed_columns = [
-    "first_party_id_type",
-    "first_party_id_value",
-    "matched_id_type",
-    "matched_id_value",
-    "d",
-  ]
-
-  analysis_method = "DIRECT_QUERY"
-
-  analysis_rules = [
-    {
-      type = "CUSTOM"
-      policy = {
-        v1 = {
-          custom = {
-            allowed_analyses    = local.analysis_template_arns
-            additional_analyses = "NOT_ALLOWED"
-          }
-        }
-      }
-    }
-  ]
-
-  table_reference = {
-    glue = {
-      database_name = local.token_hem_glue_database
-      table_name    = local.token_hem_glue_table
-      region        = local.region
-    }
-  }
-}
-
-# ── Configured table associations ─────────────────────────────────────────────
-# SQL names (hem_source_file, token_hem) are fixed — referenced by the analysis template.
-
-resource "awscc_cleanrooms_configured_table_association" "hem_source_file" {
-  name                        = "hem_source_file"
-  description                 = "Token-to-HEM provider mappings (SQL name: hem_source_file)."
-  configured_table_identifier = awscc_cleanrooms_configured_table.hem_source_file.configured_table_identifier
-  membership_identifier       = awscc_cleanrooms_membership.this.membership_identifier
-  role_arn                    = aws_iam_role.cleanrooms.arn
-}
-
-resource "awscc_cleanrooms_configured_table_association" "token_hem" {
-  name                        = "token_hem"
-  description                 = "Dated token-to-HEM snapshot (SQL name: token_hem)."
-  configured_table_identifier = awscc_cleanrooms_configured_table.token_hem.configured_table_identifier
+resource "awscc_cleanrooms_configured_table_association" "this" {
+  name                        = local.configured_table_name
+  configured_table_identifier = awscc_cleanrooms_configured_table.this.configured_table_identifier
   membership_identifier       = awscc_cleanrooms_membership.this.membership_identifier
   role_arn                    = aws_iam_role.cleanrooms.arn
 }

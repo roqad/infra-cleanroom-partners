@@ -24,7 +24,10 @@ Before running Terraform:
 
 ## Setup
 
-1. Edit `config.tf` — fill in your Glue table names and S3 locations.
+1. Edit `config.tf`:
+   - Set `schema_type` to `"hem_source_file"` or `"token_hem"` (see schemas below).
+   - Set `configured_table_name` to a unique name if multiple providers with the same schema join the collaboration.
+   - Fill in your Glue table name and S3 location.
 2. Edit `main.tf` — replace the placeholder `collaboration_id` and `analysis_template_arns` with the values from Roqad.
 
 ```sh
@@ -62,9 +65,9 @@ Additional columns are allowed and are not exposed to the collaboration.
 | Resource | Purpose |
 |---|---|
 | `awscc_cleanrooms_membership` | Joins the Roqad collaboration (creating this = accepting the invite) |
-| `awscc_cleanrooms_configured_table` × 2 | Registers `hem_source_file` and `token_hem` with a CUSTOM analysis rule |
-| `awscc_cleanrooms_configured_table_association` × 2 | Makes the tables queryable within the collaboration |
-| `aws_iam_role` + inline policy | Allows the Clean Rooms service to read your Glue metadata and S3 data — scoped to the two prefixes you configure, nothing else |
+| `awscc_cleanrooms_configured_table` | Registers your table with a CUSTOM analysis rule locked to Roqad's template ARNs |
+| `awscc_cleanrooms_configured_table_association` | Makes the table queryable within the collaboration under `configured_table_name` |
+| `aws_iam_role` + inline policy | Allows the Clean Rooms service to read your Glue metadata and S3 data — scoped to the single prefix you configure, nothing else |
 
 ## Security
 
