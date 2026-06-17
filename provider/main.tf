@@ -75,20 +75,3 @@ resource "awscc_cleanrooms_configured_table_association" "this" {
   membership_identifier       = awscc_cleanrooms_membership.this.membership_identifier
   role_arn                    = aws_iam_role.cleanrooms.arn
 }
-
-# ── Backward compatibility ────────────────────────────────────────────────────
-# Providers who applied the previous single-resource form will have:
-#   awscc_cleanrooms_configured_table.this
-#   awscc_cleanrooms_configured_table_association.this
-# These moved blocks prevent Terraform from destroying and recreating them.
-# Safe to remove once all providers have re-applied.
-
-moved {
-  from = awscc_cleanrooms_configured_table.this
-  to   = awscc_cleanrooms_configured_table.this["hem_source_file"]
-}
-
-moved {
-  from = awscc_cleanrooms_configured_table_association.this
-  to   = awscc_cleanrooms_configured_table_association.this["hem_source_file"]
-}
