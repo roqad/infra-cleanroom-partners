@@ -12,5 +12,5 @@ locals {
   s3_bucket = "roqad-cleanroom-hemmatch-out-eu-west-1"
 
   # S3 prefix scoped to this customer. Customer can only write here.
-  s3_prefix = "match-stats-input/customer_id=${local.customer_id}/"
+  s3_prefix = "customer-hems-input/customer_id=${local.customer_id}/"
 }
