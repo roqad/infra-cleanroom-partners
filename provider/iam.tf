@@ -18,7 +18,7 @@ data "aws_iam_policy_document" "cleanrooms_assume" {
 }
 
 resource "aws_iam_role" "cleanrooms" {
-  name                 = "match-stats-cleanrooms-member"
+  name                 = local.iam_role_name
   assume_role_policy   = data.aws_iam_policy_document.cleanrooms_assume.json
   max_session_duration = 3600
 }
@@ -35,14 +35,19 @@ data "aws_iam_policy_document" "cleanrooms_access" {
   }
 
   statement {
-    sid     = "S3ListBucket"
-    effect  = "Allow"
-    actions = ["s3:ListBucket"]
+    sid       = "S3ListBucket"
+    effect    = "Allow"
+    actions   = ["s3:ListBucket"]
     resources = distinct([for t in local.tables : "arn:aws:s3:::${t.s3_bucket}"])
+    condition {
+      test     = "StringLike"
+      variable = "s3:prefix"
+      values   = [for t in local.tables : "${t.s3_key_prefix}*"]
+    }
   }
 
   statement {
-    sid    = "GlueReadTable"
+    sid    = "GlueRead"
     effect = "Allow"
     actions = [
       "glue:GetDatabase",
@@ -62,7 +67,7 @@ data "aws_iam_policy_document" "cleanrooms_access" {
 }
 
 resource "aws_iam_role_policy" "cleanrooms_access" {
-  name   = "match-stats-cleanrooms-member-access"
+  name   = "${local.iam_role_name}-access"
   role   = aws_iam_role.cleanrooms.id
   policy = data.aws_iam_policy_document.cleanrooms_access.json
 }

@@ -1,41 +1,27 @@
 # Roqad-provided constants - do not change.
-# These are set once when your account is onboarded.
-# Roqad will notify you if any value changes (e.g. a new analysis template version)
-# and ask you to re-apply.
 
 locals {
   region = "eu-west-1"
 
-  # Replace with the value from Roqad (format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)
+  # Roqad collaboration ID - provided during onboarding.
   collaboration_id = "00000000-0000-0000-0000-000000000000"
-
-  # All current Roqad analysis template ARNs. Both old and new versions are listed
-  # during template upgrades so queries keep running across the rollover.
-  # Replace with the ARN(s) from Roqad.
-  analysis_template_arns = [
-    "arn:aws:cleanrooms:eu-west-1:000000000000:membership/00000000-0000-0000-0000-000000000000/analysistemplate/00000000-0000-0000-0000-000000000000",
-  ]
-
-  allowed_columns = ["first_party_id_type", "first_party_id_value", "matched_id_type", "matched_id_value"]
 }
 
 data "aws_caller_identity" "current" {}
 
-# Creating this resource accepts the Roqad collaboration invitation.
-# This account is a data provider - Roqad runs all queries on behalf of customers.
+# Accepting the Roqad collaboration invitation.
 resource "awscc_cleanrooms_membership" "this" {
   collaboration_identifier = local.collaboration_id
   query_log_status         = "ENABLED"
 }
 
 # One resource per entry in local.tables (config.tf).
-# allowed_columns and analysis_rules are fixed by the Roqad analysis template.
-# Do not change these.
+# allowed_columns and analysis_rules are set per-table in config.tf.
 resource "awscc_cleanrooms_configured_table" "this" {
   for_each        = local.tables
   name            = each.key
   description     = "Provider data for Roqad cleanroom collaboration."
-  allowed_columns = local.allowed_columns
+  allowed_columns = each.value.allowed_columns
   analysis_method = "DIRECT_QUERY"
 
   analysis_rules = [
