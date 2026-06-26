@@ -14,15 +14,18 @@ For **customers** who upload their HEM batches to Roqad's S3 bucket for match-ra
 
 ## Provider setup (`provider/`)
 
-See `provider/config.tf` for required variables. The provider joins the AWS Clean Rooms collaboration as a member and registers their Glue table.
+The provider joins the AWS Clean Rooms collaboration as a member and registers one or more Glue tables. `provider/config.tf` is the only file that needs to be edited.
 
-Membership invitation is sent by Roqad. Once invited, the provider:
+Roqad provides:
+- Collaboration ID (set in `provider/main.tf`)
+- Table names, `allowed_columns`, and analysis template ARNs (set in `provider/config.tf`)
 
-1. Clones this repo
-2. Fills in `provider/config.tf` with their Glue table and S3 location
-3. Fills in `provider/main.tf` with the collaboration ID and analysis template ARNs provided by Roqad
-4. Runs `terraform init && terraform apply`
-5. Confirms setup is complete by sharing the `membership_id` output with Roqad
+Steps:
+
+1. Clone this repo
+2. Fill in `provider/config.tf`: `iam_role_name`, `analysis_template_arns`, and one entry per table in `tables`
+3. Run `tofu init && tofu apply`
+4. Share the `membership_id` output with Roqad to confirm setup
 
 ## Customer setup (`customer/`)
 
